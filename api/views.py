@@ -8,14 +8,6 @@ from django.conf import settings
 import requests
 
 
-# Create your views here.
-# https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key} --> https://openweathermap.org/current
-# http://api.openweathermap.org/geo/1.0/reverse?lat=51.5098&lon=-0.1180&limit=5&appid={API key} --> https://openweathermap.org/api/geocoding-api
-# https://api.openweathermap.org/data/2.5/weather?lat=57&lon=-2.15&appid={API key}&units=metric --> https://openweathermap.org/current#data
-# key --> b62040e2dcd50d3763d87680c4bcb714
-# https://docs.djangoproject.com/en/5.0/ref/contrib/gis/geoip2/
-
-
 @require_http_methods(["GET"])
 def home(request):
     name = request.GET.get("name", "Anonymous")

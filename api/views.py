@@ -23,8 +23,7 @@ def home(request):
     response["client_ip"] = client_ip
 
     # weather data
-    ip = "google.com"
-    g = GeoIP2().city(ip)
+    g = GeoIP2().city(client_ip)
     print(g)
     location = g["city"]
     lat = g["latitude"]

@@ -9,7 +9,7 @@ from .utils import get_weather_data, get_client_ip
 
 @require_http_methods(["GET"])
 def home(request):
-    name = request.GET.get("name", "Anonymous")
+    name = request.GET.get("visitor_name", "Anonymous")
 
     response = {}
 

@@ -2,10 +2,9 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.gis.geoip2 import GeoIP2
-from django.conf import settings
 
 
-import requests
+from .utils import get_weather_data, get_client_ip
 
 
 @require_http_methods(["GET"])
@@ -14,43 +13,25 @@ def home(request):
 
     response = {}
 
-    # client ip
-    client_ip = request.META.get("HTTP_X_FORWARDED_FOR")
-    if client_ip:
-        client_ip = client_ip.split(",")[0]
-    else:
-        client_ip = request.META.get("REMOTE_ADDR")
+    # client ip address
+    client_ip = get_client_ip(request)
     response["client_ip"] = client_ip
 
-    # weather data
+    # geoip
     g = GeoIP2().city(client_ip)
-    print(g)
-    location = g["city"]
-    lat = g["latitude"]
-    lon = g["longitude"]
+    weather_data = get_weather_data(g["latitude"], g["longitude"])
 
-    weather_data_endpoint = "https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={key}&units=metric"
-    weather_response_data = requests.get(
-        weather_data_endpoint.format(
-            lat=lat,
-            lon=lon,
-            key=settings.WEATHER_API_KEY,
-        )
-    )
-
-    weather_json_data = weather_response_data.json()
-
-    if weather_response_data.status_code == 200:
-        temperature = weather_json_data["main"]["temp"]
-        if not location:
-            location = weather_json_data["name"]
-        response["location"] = location
+    if not weather_data["success"]:
+        response["location"] = g["city"]
         response["greeting"] = (
-            f"Hello {name}!, the temperature is {temperature} degrees Celcius in {location}"
+            f"Hello {name}!, sorry we could not get weather information for {g['city']}"
         )
+
     else:
+        response["location"] = g["city"] or weather_data["name"]
+        temperature = weather_data["temperature"]
         response["greeting"] = (
-            f"Hello {name}!, sorry we could not get weather information for {location}"
+            f"Hello {name}!, the temperature is {temperature} degrees Celcius in {response['location']}"
         )
 
     return JsonResponse(response)
